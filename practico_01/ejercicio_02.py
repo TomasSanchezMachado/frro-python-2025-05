@@ -9,12 +9,12 @@ def maximo_encadenado(a: float, b: float, c: float) -> float:
     """
     pass # Completar
 
-
 # NO MODIFICAR - INICIO
 assert maximo_encadenado(1, 10, 5) == 10
 assert maximo_encadenado(4, 9, 18) == 18
 assert maximo_encadenado(24, 9, 18) == 24
 # NO MODIFICAR - FIN
+
 
 
 ###############################################################################
@@ -35,6 +35,7 @@ assert maximo_cuadruple(24, 9, 18, 30) == 30
 # NO MODIFICAR - FIN
 
 
+
 ###############################################################################
 
 
@@ -53,12 +54,21 @@ assert maximo_arbitrario(24, 9, 18, 30) == 30
 # NO MODIFICAR - FIN
 
 
+
 ###############################################################################
 
 
 def maximo_recursivo(*args) -> float:
     """Re-Escribir de forma recursiva."""
-    pass # Completar
+    if len(args) == 1:
+        return args[0]
+    else:
+        max_de_los_restantes = maximo_recursivo(*args[1:])
+
+        if args[0] > max_de_los_restantes:
+            return args[0]
+        else:
+            return max_de_los_restantes
 
 
 # NO MODIFICAR - INICIO
