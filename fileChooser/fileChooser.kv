@@ -1,0 +1,64 @@
+<MainScreen>:
+    orientation: "vertical"
+    spacing: 10
+    padding: 10
+
+    BoxLayout:
+        orientation: "horizontal"
+        size_hint_y: 0.1
+
+        Label:
+            text: "Ruta de la imagen:"
+            size_hint_x: 0.3
+
+        TextInput:
+            id: image_path_input
+            text: root.image_path
+            multiline: False
+            readonly: True
+            size_hint_x: 0.7
+
+    Button:
+        text: "Seleccionar Imagen"
+        size_hint_y: 0.1
+        on_release: file_popup.open()
+
+    Label:
+        id: status_label
+        text: "Esperando selección de imagen..."
+        size_hint_y: 0.1
+
+    Image:
+        source: root.image_path
+        allow_stretch: True
+        keep_ratio: True
+
+    Popup:
+        id: file_popup
+        title: "Seleccionar Imagen"
+        size_hint: 0.9, 0.9
+        auto_dismiss: False
+
+        BoxLayout:
+            orientation: 'vertical'
+
+            FileChooserIconView:
+                id: filechooser
+                path: "C:\\Users"
+                filters: ['*.png', '*.jpg', '*.jpeg', '*.bmp']
+                on_selection: root.selecciona_archivo(self.selection)
+
+            BoxLayout:
+                size_hint_y: 0.1
+
+                Button:
+                    text: "Cargar Imagen"
+                    on_press:
+                        root.abrir_archivo(filechooser.selection)
+                        file_popup.dismiss()
+
+                Button:
+                    text: "Cancelar"
+                    on_release: file_popup.dismiss()
+
+MainScreen:
