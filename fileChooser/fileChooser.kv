@@ -1,3 +1,4 @@
+
 <MainScreen@BoxLayout>:
     orientation: "vertical"
     spacing: 10
@@ -22,7 +23,7 @@
 
             FileChooserIconView:
                 id: filechooser
-                path: "C:\\Users\\marag\\Carpetas"
+                path: root.initial_path
                 filters: ['*.png', '*.jpg', '*.jpeg', '*.bmp']
                 on_selection: root.selecciona_archivo(self.selection)
 

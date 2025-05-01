@@ -3,10 +3,12 @@ from kivy.properties import StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from PIL import Image as PILImage
 import uuid
+import os
 
 
 class MainScreen(BoxLayout):
     image_path = StringProperty("") 
+    initial_path = StringProperty(os.path.expanduser("~"))  # Cambia esto a la ruta inicial deseada
     # esto se hace porque sino, al seleccionar una imagen se abre sin apretar cargar imagen
     def selecciona_archivo(self, selection):
         if selection:
