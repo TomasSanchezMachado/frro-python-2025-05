@@ -1,0 +1,47 @@
+#:import os os
+
+BoxLayout:
+    orientation: "vertical"
+    padding: 10
+    spacing: 10
+
+    Image:
+        id: img
+        source: ""
+
+    Button:
+        text: "Seleccionar imagen"
+        size_hint_y: None
+        height: 40
+        on_press: file_popup.open()
+
+    Popup:
+        id: file_popup
+        title: "Seleccionar Imagen"
+        size_hint: 0.9, 0.9
+        auto_dismiss: False
+
+        BoxLayout:
+            orientation: "vertical"
+            spacing: 10
+            padding: 10
+
+            FileChooserIconView:
+                id: filechooser
+                path: os.path.expanduser("~")
+                filters: ['*.png', '*.jpg', '*.jpeg', '*.bmp']
+
+            BoxLayout:
+                size_hint_y: None
+                height: 40
+                spacing: 10
+
+                Button:
+                    text: "Cargar Imagen"
+                    on_press:
+                        app.root.ids.img.source = app.abrir_archivo(filechooser.selection[0]) if filechooser.selection else ''
+                        file_popup.dismiss()
+
+                Button:
+                    text: "Cancelar"
+                    on_press: file_popup.dismiss()
