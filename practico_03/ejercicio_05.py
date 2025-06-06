@@ -1,5 +1,6 @@
 """Propiedades"""
 
+from dataclasses import dataclass, field
 
 class Auto:
     """La clase auto tiene dos propiedades, precio y marca. La marca se define
@@ -12,7 +13,20 @@ class Auto:
     Referencia: https://docs.python.org/3/library/functions.html#property"""
 
     # Completar
-
+    def __init__(self, nombre: str, precio: float):
+        self._nombre = nombre
+        self._precio = precio
+    @property
+    def nombre(self) -> str:
+        return self._nombre.capitalize()
+    @property
+    def precio(self) -> float:
+        return round(self._precio, 2)
+    @precio.setter
+    def precio(self, valor: float) -> None:
+        if valor < 0:
+            raise ValueError("El precio no puede ser negativo")
+        self._precio = valor
 
 # NO MODIFICAR - INICIO
 auto = Auto("Ford", 12_875.456)
@@ -40,7 +54,20 @@ class Auto:
     """Re-Escribir utilizando DataClasses"""
 
     # Completar
-
+    _nombre: str
+    _precio: float = field(default=0.0, metadata={"round": 2})
+    
+    @property
+    def nombre(self) -> str:
+        return self._nombre.capitalize()
+    @property
+    def precio(self) -> float:
+        return round(self._precio, 2)
+    @precio.setter
+    def precio(self, valor: float) -> None:
+        if valor < 0:
+            raise ValueError("El precio no puede ser negativo")
+        self._precio = valor
 
 # NO MODIFICAR - INICIO
 auto = Auto("Ford", 12_875.456)

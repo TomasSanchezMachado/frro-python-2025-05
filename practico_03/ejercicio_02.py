@@ -11,6 +11,14 @@ class Articulo:
     """
 
     # Completar
+    def __init__(self, nombre: str = ""):
+        self.nombre = nombre
+        self.id_ = Articulo._get_next_id()
+    _last_id = 0
+    @classmethod
+    def _get_next_id(cls) -> int:
+        cls._last_id += 1
+        return cls._last_id
 
 
 # NO MODIFICAR - INICIO
