@@ -67,7 +67,6 @@ def superposicion_set(lista_1: Iterable[Any], lista_2: Iterable[Any]) -> bool:
     """
 
     resultado = bool(set(lista_1) & set(lista_2))
-    print(resultado)
     return resultado
 
 # NO MODIFICAR - INICIO

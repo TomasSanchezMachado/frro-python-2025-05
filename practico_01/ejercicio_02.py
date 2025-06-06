@@ -30,7 +30,6 @@ def maximo_cuadruple(a: float, b: float, c: float, d: float) -> float:
 
     Referencia: https://docs.python.org/3/library/functions.html#max"""
     maximo = max(a, b, c ,d)
-    print (maximo)
     return maximo
 
 # NO MODIFICAR - INICIO

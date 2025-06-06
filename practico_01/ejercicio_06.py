@@ -75,20 +75,22 @@ if __name__ == "__main__":
 ###############################################################################
 
 
-def numeros_al_final_recursivo(lista: List[Union[float, str]]) -> List[Union[float, str]]:
-    """CHALLENGE OPCIONAL - Re-escribir de forma recursiva."""
-    if len(lista) == 0:
-        return []
+# def numeros_al_final_recursivo(lista: List[Union[float, str]]) -> List[Union[float, str]]:
+#     """CHALLENGE OPCIONAL - Re-escribir de forma recursiva."""
+#     if not lista:
+#         return []
     
-    if isinstance(lista[0], (int, float)):
-
-        return numeros_al_final_recursivo(lista[1:]) + [lista[0]]
-    else:
-        return [lista[0]] + numeros_al_final_recursivo(lista[1:])
+#     primero = lista[0]
+#     resto = numeros_al_final_recursivo(lista[1:])
     
-    #Esta solución devuelve ["a", "b", "j", 10, 1, 3] ->No se como hacer para que devuelva los numeros en el orden esperado
+#     if isinstance(primero, (int, float)):
+#         return resto + [primero]
+#     else:
+#         return [primero] + resto
+    
+#     #Esta solución devuelve ["a", "b", "j", 10, 1, 3] ->No se como hacer para que devuelva los numeros en el orden esperado
 
-# NO MODIFICAR - INICIO
-if __name__ == "__main__":
-    assert numeros_al_final_recursivo([3, "a", 1, "b", 10, "j"]) == ["a", "b", "j", 3, 1, 10]
-# NO MODIFICAR - FIN
+# # NO MODIFICAR - INICIO
+# if __name__ == "__main__":
+#     assert numeros_al_final_recursivo([3, "a", 1, "b", 10, "j"]) == ["a", "b", "j", 3, 1, 10]
+# # NO MODIFICAR - FIN
