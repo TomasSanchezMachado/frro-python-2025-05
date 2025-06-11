@@ -6,13 +6,9 @@
 </head>
 <body>
     <h2>Login</h2>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <p style="color:red">{{ message }}</p>
-        {% endfor %}
+      {% if error %}
+          <p style="color:red">{{ error }}</p>
       {% endif %}
-    {% endwith %}
 
     <form method="POST">
         <label for="username">Username:</label>

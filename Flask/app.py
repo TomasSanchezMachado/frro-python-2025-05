@@ -10,9 +10,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 app.register_blueprint(auth_bp, url_prefix='/auth')
 
-
 @app.route('/')
 def home():
+    # Si no hay sesión, redirige al login (en el blueprint `auth_bp`)
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     return render_template('home.html', username=session['username'])
@@ -26,4 +26,3 @@ if __name__ == '__main__':
             db.session.add(admin)
             db.session.commit()
     app.run()
-

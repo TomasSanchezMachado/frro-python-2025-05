@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from models import db, User
+from flask import Blueprint, render_template, request, redirect, url_for, session
+from models import User, db
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -14,12 +14,14 @@ def login():
             session['user_id'] = user.id
             session['username'] = user.username
             return redirect(url_for('home'))
-        else:
-            flash('Invalid credentials')
+        else:        
+            return render_template('login.html', error='Credenciales inválidas')
 
     return render_template('login.html')
 
+
 @auth_bp.route('/logout')
 def logout():
-    session.clear()
+    session.pop('user_id', None)
+    session.pop('username', None)
     return redirect(url_for('auth.login'))
