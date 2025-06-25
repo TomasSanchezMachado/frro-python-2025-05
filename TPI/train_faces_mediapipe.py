@@ -25,10 +25,16 @@ reconocido = False
 tiempo_reconocimiento = None
 
 # Variables para liveness (detección de parpadeo)
-EYE_AR_THRESH = 0.2  # umbral para el Aspect Ratio del ojo
-EYE_AR_CONSEC_FRAMES = 3  # cantidad mínima de frames para contar un parpadeo
+EYE_AR_THRESH = 0.2
+EYE_AR_CONSEC_FRAMES = 3
 COUNTER = 0
 BLINKED = False
+
+# Variables para segunda prueba de vida
+verificando_liveness_extra = False
+inicio_verificacion = None
+sonrisa_detectada = False
+movimiento_detectado = False
 
 def guardar_log(nombre):
     fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -38,10 +44,6 @@ def guardar_log(nombre):
     print(f"[LOG] Registro guardado: {nombre} - {fecha_hora}")
 
 def eye_aspect_ratio(landmarks, eye_indices):
-    # Calcula el Eye Aspect Ratio para detectar si el ojo está cerrado
-    # eye_indices es la lista de índices de puntos del ojo en face_mesh
-    # Fórmula simplificada:
-    # EAR = (||p2 - p6|| + ||p3 - p5||) / (2 * ||p1 - p4||)
     p1 = np.array([landmarks[eye_indices[0]].x, landmarks[eye_indices[0]].y])
     p2 = np.array([landmarks[eye_indices[1]].x, landmarks[eye_indices[1]].y])
     p3 = np.array([landmarks[eye_indices[2]].x, landmarks[eye_indices[2]].y])
@@ -56,7 +58,22 @@ def eye_aspect_ratio(landmarks, eye_indices):
     ear = (vertical1 + vertical2) / (2.0 * horizontal)
     return ear
 
-# Índices de los ojos en MediaPipe Face Mesh (ojo derecho e izquierdo)
+def detectar_sonrisa(landmarks):
+    izquierda = np.array([landmarks[61].x, landmarks[61].y])
+    derecha = np.array([landmarks[291].x, landmarks[291].y])
+    inferior = np.array([landmarks[17].x, landmarks[17].y])
+
+    ancho_boca = np.linalg.norm(derecha - izquierda)
+    altura_boca = np.linalg.norm(inferior - ((izquierda + derecha) / 2))
+
+    razon_sonrisa = altura_boca / ancho_boca
+    return razon_sonrisa > 0.3
+
+def mover_cabeza_lateral(landmarks):
+    nariz = landmarks[1].x
+    return nariz < 0.45 or nariz > 0.55
+
+# Índices de los ojos en MediaPipe Face Mesh
 LEFT_EYE_IDX = [33, 160, 158, 133, 153, 144]
 RIGHT_EYE_IDX = [362, 385, 387, 263, 373, 380]
 
@@ -75,14 +92,12 @@ while True:
     roi = frame[y1:y2, x1:x2]
     roi_rgb = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
 
-    # Detectar cara con MediaPipe
     results = face_detection.process(roi_rgb)
     mesh_results = face_mesh.process(roi_rgb)
 
     name = "Desconocido"
     color = (0, 0, 255)
 
-    # Liveness detection (parpadeo)
     if mesh_results.multi_face_landmarks:
         landmarks = mesh_results.multi_face_landmarks[0].landmark
 
@@ -90,7 +105,6 @@ while True:
         right_ear = eye_aspect_ratio(landmarks, RIGHT_EYE_IDX)
         ear = (left_ear + right_ear) / 2.0
 
-        # Detectar si ojo cerrado (posible parpadeo)
         if ear < EYE_AR_THRESH:
             COUNTER += 1
         else:
@@ -98,32 +112,56 @@ while True:
                 BLINKED = True
             COUNTER = 0
 
-    # Si se detectó parpadeo y hay detección de cara (MediaPipe)
-    if results.detections and BLINKED:
-        # Usar face_recognition para encoding y comparación
-        face_locations = face_recognition.face_locations(roi_rgb)
-        face_encodings = face_recognition.face_encodings(roi_rgb, face_locations)
+    if results.detections and BLINKED and not verificando_liveness_extra:
+        verificando_liveness_extra = True
+        inicio_verificacion = time.time()
+        print("[INFO] Parpadeo detectado. Esperando sonrisa o movimiento de cabeza...")
 
-        if face_encodings:
-            encoding = face_encodings[0]
-            matches = face_recognition.compare_faces(list(encodings_db.values()), encoding, tolerance=0.5)
-            distances = face_recognition.face_distance(list(encodings_db.values()), encoding)
+    if verificando_liveness_extra:
+        if mesh_results.multi_face_landmarks:
+            landmarks = mesh_results.multi_face_landmarks[0].landmark
 
-            if True in matches:
-                best_match_index = distances.argmin()
-                name = list(encodings_db.keys())[best_match_index]
-                color = (0, 255, 0)
+            if detectar_sonrisa(landmarks):
+                sonrisa_detectada = True
+                print("[INFO] Sonrisa detectada.")
 
-            if not reconocido and name != "Desconocido":
-                reconocido = True
-                tiempo_reconocimiento = time.time()
-                guardar_log(name)
+            if mover_cabeza_lateral(landmarks):
+                movimiento_detectado = True
+                print("[INFO] Movimiento lateral detectado.")
+
+        if sonrisa_detectada or movimiento_detectado:
+            face_locations = face_recognition.face_locations(roi_rgb)
+            face_encodings = face_recognition.face_encodings(roi_rgb, face_locations)
+
+            if face_encodings:
+                encoding = face_encodings[0]
+                matches = face_recognition.compare_faces(list(encodings_db.values()), encoding, tolerance=0.5)
+                distances = face_recognition.face_distance(list(encodings_db.values()), encoding)
+
+                if True in matches:
+                    best_match_index = distances.argmin()
+                    name = list(encodings_db.keys())[best_match_index]
+                    color = (0, 255, 0)
+
+                if not reconocido and name != "Desconocido":
+                    reconocido = True
+                    tiempo_reconocimiento = time.time()
+                    guardar_log(name)
+
+            verificando_liveness_extra = False
+            BLINKED = False
+            sonrisa_detectada = False
+            movimiento_detectado = False
+
+        elif time.time() - inicio_verificacion > 5:
+            print("[WARN] No se detectó gesto adicional dentro del tiempo.")
+            verificando_liveness_extra = False
+            BLINKED = False
+            COUNTER = 0
 
     cv2.putText(frame, f"Empleado: {name}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
-
-    # Mostrar estado de liveness
-    status_text = "Parpadeo detectado" if BLINKED else "Esperando parpadeo..."
-    cv2.putText(frame, status_text, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+    estado_extra = "Parpadeo detectado. Esperando sonrisa o movimiento..." if verificando_liveness_extra else ""
+    cv2.putText(frame, estado_extra, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
 
     cv2.imshow("Reconocimiento con Liveness", frame)
 
